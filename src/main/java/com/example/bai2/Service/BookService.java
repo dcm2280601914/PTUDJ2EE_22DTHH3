@@ -6,18 +6,25 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service // Đánh dấu lớp này là một Service
+@Service
 public class BookService {
 
-    // Khởi tạo danh sách sách để lưu trữ dữ liệu tạm thời
     private List<Book> books = new ArrayList<>();
 
-    // 1. Lấy toàn bộ danh sách sách
+    // Biến để quản lý ID tự động tăng, bắt đầu từ 5 (vì đã có 4 cuốn mẫu)
+    private int nextId = 5;
+
+    public BookService() {
+        books.add(new Book(1, "Java Core", "Nguyễn Văn A"));
+        books.add(new Book(2, "Spring Boot", "Trần Văn B"));
+        books.add(new Book(3, "Clean Code", "Robert C. Martin"));
+        books.add(new Book(4, "Design Patterns", "GoF"));
+    }
+
     public List<Book> getAllBooks() {
         return books;
     }
 
-    // 2. Lấy sách theo ID sử dụng Stream API
     public Book getBookById(int id) {
         return books.stream()
                 .filter(book -> book.getId() == id)
@@ -25,23 +32,23 @@ public class BookService {
                 .orElse(null);
     }
 
-    // 3. Thêm một cuốn sách mới
+    // Cập nhật hàm THÊM: Tự động gán ID mới
     public void addBook(Book book) {
+        book.setId(nextId++); // Gán ID hiện tại và tăng lên cho lần sau
         books.add(book);
     }
 
-    // 4. Cập nhật thông tin sách theo ID
     public void updateBook(int id, Book updatedBook) {
-        books.stream()
-                .filter(book -> book.getId() == id)
-                .findFirst()
-                .ifPresent(book -> {
-                    book.setTitle(updatedBook.getTitle());
-                    book.setAuthor(updatedBook.getAuthor());
-                });
+        for (int i = 0; i < books.size(); i++) {
+            if (books.get(i).getId() == id) {
+                Book existingBook = books.get(i);
+                existingBook.setTitle(updatedBook.getTitle());
+                existingBook.setAuthor(updatedBook.getAuthor());
+                return;
+            }
+        }
     }
 
-    // 5. Xóa sách khỏi danh sách theo ID
     public void deleteBook(int id) {
         books.removeIf(book -> book.getId() == id);
     }
