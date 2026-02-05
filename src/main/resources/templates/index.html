@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common :: header-css"></head>
+<body class="bg-light">
+
+<div th:replace="common :: navbar"></div>
+
+<div class="container mt-5">
+
+    <!-- THÔNG BÁO -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>📦 Danh sách sản phẩm</h3>
+        <a href="/add" class="btn btn-success">➕ Thêm sản phẩm</a>
+    </div>
+
+    <!-- TABLE -->
+    <table class="table table-bordered table-hover bg-white shadow-sm">
+        <thead class="table-dark text-center">
+        <tr>
+            <th style="width:60px;">#</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th style="width:120px;">Image</th>
+            <th style="width:180px;">Hành động</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="b, st : ${books}">
+            <td th:text="${st.count}" class="text-center fw-bold"></td>
+
+            <td th:text="${b.title}"></td>
+            <td th:text="${b.author}"></td>
+
+            <td class="text-center">
+                <span class="badge bg-info text-dark"
+                      th:text="${b.category}"></span>
+            </td>
+
+            <!-- ẢNH -->
+            <td class="text-center">
+                <img th:if="${b.imageUrl != null}"
+                     th:src="${b.imageUrl}"
+                     width="80"
+                     height="100"
+                     style="object-fit: cover; border-radius: 6px;"
+                     th:alt="${b.title}">
+                <span th:if="${b.imageUrl == null}"
+                      class="text-muted small">Chưa có ảnh</span>
+            </td>
+
+            <!-- ACTION -->
+            <td class="text-center">
+                <a th:href="@{/edit/{id}(id=${b.id})}"
+                   class="btn btn-warning btn-sm me-1">✏️ Sửa</a>
+
+                <form th:action="@{/delete/{id}(id=${b.id})}"
+                      method="post"
+                      style="display:inline;">
+                    <button type="submit"
+                            class="btn btn-danger btn-sm"
+                            onclick="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?')">
+                        🗑️ Xóa
+                    </button>
+                </form>
+            </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(books)}">
+            <td colspan="6" class="text-center text-muted py-5 fs-5">
+                Hiện tại chưa có sản phẩm nào. Hãy thêm mới nhé! 😊
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:replace="common :: footer"></div>
+
+</body>
+</html>

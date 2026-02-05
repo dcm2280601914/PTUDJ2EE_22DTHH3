@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common :: header-css"></head>
+<body class="bg-light">
+
+<div th:replace="common :: navbar"></div>
+
+<div class="container mt-4">
+    <h3>✏️ Sửa sản phẩm</h3>
+
+    <!-- Thông báo flash nếu có -->
+    <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+
+    <form th:action="@{/edit}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="id" th:value="${book.id}">
+
+        <div class="mb-3">
+            <label class="form-label">Title:</label>
+            <input type="text" class="form-control" name="title" th:value="${book.title}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Author:</label>
+            <input type="text" class="form-control" name="author" th:value="${book.author}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Category:</label>
+            <select class="form-select" name="category" required>
+                <option th:each="c : ${categories}"
+                        th:value="${c}"
+                        th:text="${c}"
+                        th:selected="${book.category == c}"></option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Current Image:</label><br>
+            <img th:if="${book.imageUrl != null}"
+                 th:src="@{${book.imageUrl}}"
+                 class="img-preview" alt="Ảnh hiện tại">
+            <span th:if="${book.imageUrl == null}" class="text-muted">Chưa có ảnh</span>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">New Image (nếu muốn thay):</label>
+            <input type="file" class="form-control" name="imageFile" accept="image/*">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Cập nhật</button>
+        <a href="/" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>
+
+<div th:replace="common :: footer"></div>
+
+</body>
+</html>
