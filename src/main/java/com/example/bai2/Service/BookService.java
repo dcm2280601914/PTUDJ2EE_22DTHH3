@@ -1,55 +1,66 @@
 package com.example.bai2.Service;
 
 import com.example.bai2.Model.Book;
+import com.example.bai2.Model.Category;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class BookService {
 
-    private List<Book> books = new ArrayList<>();
-
-    // Biến để quản lý ID tự động tăng, bắt đầu từ 5 (vì đã có 4 cuốn mẫu)
-    private int nextId = 5;
+    private final List<Book> books = new CopyOnWriteArrayList<>();
+    private final AtomicLong nextId = new AtomicLong(1);
 
     public BookService() {
-        books.add(new Book(1, "Java Core", "Nguyễn Văn A"));
-        books.add(new Book(2, "Spring Boot", "Trần Văn B"));
-        books.add(new Book(3, "Clean Code", "Robert C. Martin"));
-        books.add(new Book(4, "Design Patterns", "GoF"));
     }
 
+    // Lấy tất cả sách (trả về bản copy để an toàn)
     public List<Book> getAllBooks() {
-        return books;
+        return Collections.unmodifiableList(new ArrayList<>(books));
+        // Hoặc: return new ArrayList<>(books); nếu muốn cho phép modify copy
     }
 
-    public Book getBookById(int id) {
+    // Lấy sách theo ID (đổi sang Long)
+    public Book getBookById(Long id) {
+        if (id == null) return null;
         return books.stream()
-                .filter(book -> book.getId() == id)
+                .filter(b -> b.getId() != null && b.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }
 
-    // Cập nhật hàm THÊM: Tự động gán ID mới
+    // Thêm sách mới
     public void addBook(Book book) {
-        book.setId(nextId++); // Gán ID hiện tại và tăng lên cho lần sau
+        if (book == null) return;
+        book.setId(nextId.getAndIncrement());
         books.add(book);
     }
 
-    public void updateBook(int id, Book updatedBook) {
-        for (int i = 0; i < books.size(); i++) {
-            if (books.get(i).getId() == id) {
-                Book existingBook = books.get(i);
-                existingBook.setTitle(updatedBook.getTitle());
-                existingBook.setAuthor(updatedBook.getAuthor());
-                return;
-            }
-        }
+    // Cập nhật sách
+    public boolean updateBook(Book updatedBook) {
+        if (updatedBook == null || updatedBook.getId() == null) return false;
+
+        return books.stream()
+                .filter(b -> b.getId() != null && b.getId().equals(updatedBook.getId()))
+                .findFirst()
+                .map(book -> {
+                    book.setTitle(updatedBook.getTitle());
+                    book.setAuthor(updatedBook.getAuthor());
+                    book.setCategory(updatedBook.getCategory());
+                    book.setImageUrl(updatedBook.getImageUrl());
+                    return true;
+                })
+                .orElse(false);
     }
 
-    public void deleteBook(int id) {
-        books.removeIf(book -> book.getId() == id);
+    // Xóa sách
+    public boolean deleteBook(Long id) {
+        if (id == null) return false;
+        return books.removeIf(b -> b.getId() != null && b.getId().equals(id));
     }
 }
